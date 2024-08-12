@@ -1,0 +1,5 @@
+# Browsers that we support
+# @see https://github.com/browserslist/browserslist#full-list
+
+defaults
+node 10
