@@ -1,0 +1,90 @@
+variables:
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - build
+  - deploy
+
+.build_frontend_template:
+  stage: build
+  image: docker:stable
+  variables:
+    APP_IMAGE_NAME: frontend-nginx
+    APP_BUILD_ENV: production
+    BUILDER_IMAGE_NAME: nodejs-builder
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build --tag $CI_REGISTRY_IMAGE/$BUILDER_IMAGE_NAME:latest --tag $CI_REGISTRY_IMAGE/$BUILDER_IMAGE_NAME:$CI_COMMIT_REF_SLUG -f dockerfiles/nginx/Dockerfile .
+      --target=nodejs-builder
+    - docker push $CI_REGISTRY_IMAGE/$BUILDER_IMAGE_NAME:$CI_COMMIT_REF_SLUG
+    - docker push $CI_REGISTRY_IMAGE/$BUILDER_IMAGE_NAME:latest
+    - docker build --cache-from $CI_REGISTRY_IMAGE/$APP_IMAGE_NAME:latest
+      --build-arg APP_BUILD_ENV=$APP_BUILD_ENV
+      --build-arg APP_VERSION_NAME=$CI_COMMIT_REF_NAME
+      --build-arg APP_VERSION_COMMIT=$CI_BUILD_REF
+      --cache-from=$CI_REGISTRY_IMAGE/$BUILDER_IMAGE_NAME:latest
+      --tag $CI_REGISTRY_IMAGE/$APP_IMAGE_NAME:$CI_COMMIT_REF_SLUG
+      --tag $CI_REGISTRY_IMAGE/$APP_IMAGE_NAME:latest -f dockerfiles/nginx/Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE/$APP_IMAGE_NAME:$CI_COMMIT_REF_SLUG
+    - docker push $CI_REGISTRY_IMAGE/$APP_IMAGE_NAME:latest
+  tags:
+    - docker-in-docker
+
+#build_nginx_playground:
+#  stage: build
+#  extends: .build_frontend_template
+##  only:
+##    - tags
+#  variables:
+#    APP_BUILD_ENV: dev
+
+build_nginx:
+  stage: build
+  extends: .build_frontend_template
+#  only:
+#    - tags
+#  variables:
+#    APP_BUILD_ENV: production
+
+.deploy_template:
+  stage: deploy
+  image: $DOCKER_IMAGE_DEPLOY
+  before_script:
+    - export KUBECONFIG=/opt/kubernetes/.config
+    - sed -i "s/changeme/$ENV/g" ./HelmChart/Values.yaml
+    - sed -i "s/appurl/$URL/g" ./HelmChart/Values.yaml
+    - cat ./HelmChart/Values.yaml
+  script:
+    - echo "CI_COMMIT_SHA" $CI_COMMIT_SHA
+    - envsubst < temp/deployment.tmpl > HelmChart/templates/deployment.yml
+    - helm upgrade --install widget -f ./HelmChart/Values.yaml -f ./HelmChart/Chart.yaml ./HelmChart --namespace $ENV-widget --set image.tag=$CI_COMMIT_SHA --atomic
+    - sleep 10
+    - kubectl get pods -n $ENV-widget
+  tags:
+    - k8s-runner
+#      when: on_success
+
+deploy_playground:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    ENV: dev
+    URL: widget-dev.jermakyan.ru
+  dependencies:
+    - build_nginx
+  when: manual
+
+deploy_production:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    ENV: prod
+    URL: widget.jermakyan.ru
+  dependencies:
+    - build_nginx
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: manual
+#  only:
+#    - tags
+
