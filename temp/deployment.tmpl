@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-{{ .Values.env }}-widget
+  namespace: {{ .Values.env }}-widget
+  labels:
+    env: {{ .Values.env }}
+    app: widget
+  annotations:
+    kubernetes.io/change-cause: "image updated to $CI_COMMIT_REF_SLUG at $CI_PIPELINE_URL"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: widget
+  template:
+    metadata:
+      labels:
+        app: widget
+        commit_sha: $CI_COMMIT_SHA
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials-widget
+      containers:
+        - name: widget
+          image: registry.jermakyan.ru/aamst/widget/frontend-nginx:$CI_COMMIT_REF_SLUG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: "1Gi"
+            limits:
+              cpu: 1000m
+              memory: "2Gi"

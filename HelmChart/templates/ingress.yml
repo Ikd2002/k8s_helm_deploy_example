@@ -1,0 +1,22 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+ name: nginxingress
+ namespace: {{ .Values.env }}-widget
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.url }}
+    secretName: jermakyan-le
+  rules:
+    - host: {{ .Values.url }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ .Values.env }}-widget
+              port:
+                number: 3082
+  ingressClassName: nginx

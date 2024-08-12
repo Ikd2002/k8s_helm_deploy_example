@@ -1,0 +1,8 @@
+apiVersion  : v2
+name        : widget
+description : Test widget
+type        : application
+version     : 0.0.8  #Helm Chart version
+appVersion  : 0.0.5  #application version
+maintainers :
+  - name: aamst

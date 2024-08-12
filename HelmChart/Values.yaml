@@ -1,0 +1,12 @@
+container:
+  Image: registry.jermakyan.ru/aamst/widget/frontend-nginx:latest
+
+replicaCount: 1
+
+env: changeme
+
+port: 3082
+
+targetPort: 80
+
+url: appurl
