@@ -1,0 +1,129 @@
+:root {
+  --color-blue-900: #0e62b5;
+  --color-blue-700: #0673e0;
+  --color-blue-500: #2688ee;
+
+  --color-gray-900: #3b3b3b;
+  --color-gray-700: #696969;
+  --color-gray-500: #979797;
+  --color-gray-300: #c5c5c5;
+  --color-gray-100: #f3f3f3;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--color-gray-900);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen-Sans,
+    Ubuntu,
+    Cantarell,
+    'Helvetica Neue',
+    sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.125;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: grid;
+  min-height: 100%;
+  margin: 0;
+  padding: 1rem 20px;
+  box-sizing: border-box;
+  grid-template-rows: 1fr auto;
+}
+
+h1 {
+  margin: 2rem 0;
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 2rem;
+}
+
+h2 {
+  margin: 2rem 0 1rem;
+  box-shadow: 0 2px 0 var(--color-blue-500);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+}
+
+h3 {
+  margin: 1.5rem 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--color-blue-700);
+}
+
+a:hover {
+  color: var(--color-blue-500);
+}
+
+a:active {
+  color: var(--color-blue-900);
+}
+
+ul {
+  margin: 0 0 1rem;
+  padding: 0 0 0 2rem;
+}
+
+li {
+  margin: 0;
+  padding: 0;
+}
+
+.code {
+  display: inline-block;
+  padding: 0 .25rem;
+  background-color: var(--color-gray-100);
+  border-radius: 3px;
+  color: var(--color-gray-700);
+  font-family:
+    SFMono-Regular,
+    Consolas,
+    'Liberation Mono',
+    Menlo,
+    monospace;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: pre-wrap;
+}
+
+.code_block {
+  display: block;
+  margin: 0 0 1rem;
+  padding: .5rem 1rem;
+}
+
+.footer {
+  color: var(--color-gray-500);
+  font-size: .75rem;
+  text-align: center;
+  grid-template-rows: minmax(100px, auto);
+}
+
+.footer__logo {
+  display: block;
+  width: 60px;
+  height: 26px;
+  margin: 0 auto;
+  background-image: url(/examples/assets/logo-ru.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+}

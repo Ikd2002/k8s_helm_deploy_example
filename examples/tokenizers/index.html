@@ -1,0 +1,200 @@
+<!doctype html>
+
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Токенизирующие поля</title>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+
+  <link href="../assets/global.css" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+</head>
+
+<body>
+  <main>
+    <h1>Токенизирующие поля v3</h1>
+
+    <section class="tokenizer">
+      <h2>Номер карты TESTv4</h2>
+
+      <h3>Код TESTv4 DEV</h3>
+
+      <code class="code code_block">&lt;iframe
+  name="%name%"
+  src="{{ APP_BASE_URL }}/tokenize-card?public_token=%publicToken%"
+&gt;&lt;/iframe&gt;</code>
+
+      <p class="tokenizer__label">где:</p>
+      <ul>
+        <li><code class="code">%name%</code> – уникальное имя, по которому идентифицируются сообщения, полученные при помощи <code class="code">window.addEventListener('message', callback)</code>,</li>
+        <li><code class="code">%publicToken%</code> – публичный токен.</li>
+      </ul>
+
+      <p>
+        После встраивания в страницу токенизатор при возникновении каких-либо событий начинает
+        отправлять в основное окно сообщения, которые можно прослушивать при помощи метода
+        <code class="code">window.addEventListener('message', callback)</code>:
+      </p>
+
+      <code class="code code_block">&lt;script&gt;
+  (function () {
+    window.addEventListener('message', (event) => {
+      const { data: { meta: { action, frameName } = {}, payload } = {} } = event;
+
+      if (frameName !== '%name%') {
+        // Если сообщение пришло от постороннего источника, то игнорируем его:
+        return;
+      }
+
+      // Обрабатываем в зависимости от типа события:
+      switch (action) {
+        case 'TOKEN_WAS_RECEIVED': {
+          const { token } = payload;
+
+          // Сохраняем токен карты для отправки его с остальными данными формы.
+
+          break;
+        }
+
+        default:
+          break;
+      }
+    });
+  })();
+&lt;/script&gt;</code>
+
+      <p>Формат сообщений:</p>
+
+      <code class="code code_block">{
+  data: {
+    meta: {
+      action: 'SOME_ACTION_TYPE',
+      frameName: 'some-frame-name',
+    },
+    payload: {},
+  },
+}</code>
+
+      <p class="tokenizer__label">где:</p>
+      <ul>
+        <li><code class="code">data</code></li>
+        <li><code class="code">data.meta</code> – объект, содержащий вспомогательную информацию;</li>
+        <li>
+          <p class="tokenizer__label">
+            <code class="code">data.meta.action</code> – строковая константа, описывающая тип события; может принимать одно из следующих значений:
+          </p>
+          <ul>
+            <li><code class="code">TOKENIZATION_FORM_IS_READY</code> – iframe загружен и готов в работе;</li>
+            <li><code class="code">FIELD_WAS_FOCUSED</code> – поле получило фокус;</li>
+            <li><code class="code">FIELD_WAS_CHANGED</code> – значение поля было изменено;</li>
+            <li><code class="code">FIELD_WAS_BLURRED</code> – поле потеряло фокус;</li>
+            <li><code class="code">TOKEN_WAS_REQUESTED</code> – происходит запрос токена;</li>
+            <li><code class="code">TOKEN_WAS_RECEIVED</code> – токен успешно получен;</li>
+            <li><code class="code">TOKEN_WAS_NOT_RECEIVED</code> – при получении токена произошла ошибка;</li>
+            <li><code class="code">TOKEN_WAS_RESETED</code> – значение токена было сброшено;</li>
+          </ul>
+        </li>
+        <li><code class="code">data.meta.frameName</code> – имя iframe, заданное атрибутом <code class="code">name</code>;</li>
+        <li>
+          <p class="tokenizer__label"><code class="code">[data.payload]</code> – дополнительные данные, различные для разных событий:</p>
+          <ul>
+            <li>
+              <p class="tokenizer__label"><code class="code">FIELD_WAS_FOCUSED</code> – имя поля, например:</p>
+              <code class="code code_block">{ name: 'card_number' }</code>
+            </li>
+            <li>
+              <p class="tokenizer__label"><code class="code">FIELD_WAS_CHANGED</code> – имя поля и при наличии тип ошибки валидации, например:</p>
+              <code class="code code_block">{
+  name: 'card_number',
+  validationError: 'REQUIRED_FIELD',
+}</code>
+            </li>
+            <li>
+              <p class="tokenizer__label"><code class="code">FIELD_WAS_BLURRED</code> – имя поля и при наличии тип ошибки валидации, например:</p>
+              <code class="code code_block">{
+  name: 'card_number',
+  validationError: 'REQUIRED_FIELD',
+}</code>
+            </li>
+            <li>
+              <p class="tokenizer__label"><code class="code">TOKEN_WAS_RECEIVED</code> – значение токена, например:</p>
+              <code class="code code_block">{ token: '1111111111hg234jhdg23635qwerytw' }</code>
+            </li>
+            <li>
+              <p class="tokenizer__label"><code class="code">TOKEN_WAS_NOT_RECEIVED</code> – ошибка, например:</p>
+              <code class="code code_block">{ error: 'UNKNOWN_ERROR' }</code>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>Результат</h3>
+
+      <iframe
+        class="tokenizer__frame"
+        name="card-number-token"
+        src="{{ APP_BASE_URL }}/tokenize-card?public_token=a11111111111111111111111111111111111111111111b12"
+      ></iframe>
+
+      <div class="tokenizer__result">
+        <p class="tokenizer__label">Сообщение:</p>
+        <code class="code code_block tokenizer__message">—</code>
+
+        <p class="tokenizer__label">Токен:</p>
+        <code class="code code_block tokenizer__token">—</code>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2019, Frontend team</p>
+
+    <div>
+      <a
+        class="footer__logo"
+        href="https://widget.jermakyan.ru/"
+
+        aria-label="Jermakyan widget»"
+        role="img"
+      ></a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      window.addEventListener('message', (event) => {
+        const {
+          data,
+          data: { meta: { action, frameName } = {},
+          payload: { tokens: { [frameName]: tokens } = {} } = {} },
+        } = event;
+
+        if (!frameName) {
+          return;
+        }
+
+        const $tokenizer = document.querySelector(`iframe[name=${frameName}]`).parentNode;
+        const $message = $tokenizer.querySelector('.tokenizer__message');
+        const $token = $tokenizer.querySelector('.tokenizer__token');
+
+        $message.innerHTML = JSON.stringify(data, null, '  ');
+
+        switch (action) {
+          case 'TOKEN_WAS_RECEIVED':
+            $token.innerHTML = JSON.stringify(tokens, null, '  ');
+            break;
+
+          case 'TOKEN_WAS_RESETED':
+            $token.innerHTML = '—';
+            break;
+
+          default:
+            break;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

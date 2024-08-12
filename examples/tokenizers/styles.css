@@ -1,0 +1,23 @@
+.tokenizer {
+  display: block;
+  margin: 0 0 1rem;
+}
+
+.tokenizer__frame {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: calc(1.5rem + 2px);
+  margin: 0 0 1rem;
+  box-sizing: border-box;
+  border: 1px solid #676767;
+  border-radius: 3px;
+}
+
+.tokenizer__result {
+  margin: 0 0 1rem;
+}
+
+.tokenizer__label {
+  margin-bottom: .5rem;
+}
